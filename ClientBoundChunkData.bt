@@ -339,9 +339,7 @@ typedef struct (int64 size)
 
     while (pos < end) {
         struct {
-            short blockCount;
-
-            typedef struct
+            typedef struct(byte isBiomes)
             {
                 ubyte bitsPerValue;
                 switch(bitsPerValue) {
@@ -352,6 +350,10 @@ typedef struct (int64 size)
                     case 2:
                     case 3:
                     case 4:
+                        if (isBiomes == 1 && bitsPerValue > 3) {
+                            break;
+                        }
+
                         local ubyte varSize = read_varint_size();
                         Varint length(varSize) <fgcolor=cDkAqua>;
                         local int64 len = FromVarint(length);
@@ -365,6 +367,10 @@ typedef struct (int64 size)
                     case 6:
                     case 7:
                     case 8:
+                        if (isBiomes == 1 && bitsPerValue > 3) {
+                            break;
+                        }
+
                         local ubyte varSize = read_varint_size();
                         Varint length(varSize) <fgcolor=cDkAqua>;
                         local int64 len = FromVarint(length);
@@ -380,8 +386,10 @@ typedef struct (int64 size)
                 VarLongArray storage;
             } Pallete;
 
-            Pallete states;
-            Pallete biomes;
+            short blockCount;
+
+            Pallete states(0);
+            Pallete biomes(1);
         } node;
         pos = FTell();
     }
