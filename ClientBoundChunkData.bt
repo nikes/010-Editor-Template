@@ -1,0 +1,444 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: ClientBoundChunkData - 0x22
+//   Authors: MrNikes
+//   Version: 1.18.2
+//   Purpose: 
+//  Category: Game
+// File Mask: 
+//  ID Bytes: 
+//   History: Added Handle Chunk Data Paletted
+//------------------------------------------------
+enum <ubyte> TAG_TYPE {
+    TAG_End = 0,
+    TAG_Byte,
+    TAG_Short,
+    TAG_Int,
+    TAG_Long,
+    TAG_Float,
+    TAG_Double,
+    TAG_Byte_Array,
+    TAG_String,
+    TAG_List,
+    TAG_Compound,
+    TAG_IntArray,
+    TAG_LongArray,
+};
+
+typedef struct {
+} TAG_End;
+
+typedef byte TAG_Byte;
+
+typedef short TAG_Short;
+
+typedef int TAG_Int;
+
+typedef int64 TAG_Long;
+
+typedef float TAG_Float;
+
+typedef double TAG_Double;
+
+typedef struct {
+    TAG_Int length <hidden=true>;
+    if (length > 0) byte d[length];
+} TAG_Byte_Array <read=read_TAG_Byte_Array>;
+
+string read_TAG_Byte_Array(TAG_Byte_Array &in) {
+    string out;
+
+    SPrintf(out, "byte[%i]", in.length);
+
+    return out;
+}
+
+typedef struct {
+    TAG_Short length <hidden=true>;
+    if (length > 0) char d[length];
+} TAG_String <read=read_TAG_String>;
+
+string read_TAG_String(TAG_String &in) {
+    if (in.length > 0) {
+        return in.d;
+    }
+
+    return "";
+}
+
+typedef struct {
+    local int i;
+    TAG_TYPE tagType <hidden=true>;
+    TAG_Int length <hidden=true>;
+
+    for (i = 0; i < length; i++) {
+        TAG(tagType);
+    }
+} TAG_List <read=read_TAG_LIST>;
+
+string read_TAG_LIST(TAG_List &in) {
+    string out;
+
+    SPrintf(out, "%s[%i]", EnumToString(in.tagType), in.length);
+
+    return out;
+}
+
+typedef struct {
+    TAG_TYPE tagType <hidden=true>;
+
+    if (tagType != 0) {
+        TAG_String name <hidden=true>;
+        TAG(tagType);
+    }
+} TAG_Named <read=read_TAG_Named>;
+
+string read_TAG_Named(TAG_Named &in) {
+    string out;
+
+    SPrintf(out, "%s", EnumToString(in.tagType));
+
+    if (in.tagType != 0) {
+        SPrintf(out, "%s(\"%s\")", out, read_TAG_String(in.name));
+    }
+
+    return out;
+}
+
+typedef struct {
+    local int found_end = 0;
+    local int tag_count = 0;
+
+    while (!found_end) {
+        found_end = (ReadByte(FTell()) == 0);
+
+        TAG_Named d;
+        tag_count++;
+    }
+} TAG_Compound <read=read_TAG_Compound>;
+
+string read_TAG_Compound(TAG_Compound &in) {
+    string out;
+
+    SPrintf(out, "TAG_Named[%i]", in.tag_count - 1);
+
+    return out;
+}
+
+typedef struct {
+    local int i;
+    TAG_Int length <hidden=true>;
+
+    for (i = 0; i < length; i++) {
+        TAG_Int d;
+    }
+    
+} TAG_IntArray <read=read_TAG_IntArray>;
+
+string read_TAG_IntArray(TAG_IntArray &in) {
+    string out;
+
+    SPrintf(out, "TAG_IntArray([%i]", in.length);
+
+    return out;
+}
+
+typedef struct {
+    local int i;
+    TAG_Int length <hidden=true>;
+
+    for (i = 0; i < length; i++) {
+        TAG_Long d;
+    }
+} TAG_LongArray <read=read_TAG_LongArray>;
+
+string read_TAG_LongArray(TAG_LongArray &in) {
+    string out;
+
+    SPrintf(out, "TAG_LongArray([%i]", in.length);
+
+    return out;
+}
+
+void TAG(TAG_TYPE tagType) {
+    switch (tagType) {
+        case 0:
+            TAG_End d;
+            break;
+        case 1:
+            TAG_Byte d;
+            break;
+        case 2:
+            TAG_Short d;
+            break;
+        case 3:
+            TAG_Int d;
+            break;
+        case 4:
+            TAG_Long d;
+            break;
+        case 5:
+            TAG_Float d;
+            break;
+        case 6:
+            TAG_Double d;
+            break;
+        case 7:
+            TAG_Byte_Array d;
+            break;
+        case 8:
+            TAG_String d;
+            break;
+        case 9:
+            TAG_List d;
+            break;
+        case 10:
+            TAG_Compound d;
+            break;
+        case 11:
+            TAG_IntArray d;
+            break;
+        case 12:
+            TAG_LongArray d;
+            break;
+    }
+}
+
+ubyte read_varint_size()
+{
+    local int pos = FTell();
+
+    local ubyte size = 0;
+    local ubyte i = 0;
+    while(true)
+    {
+        i = ReadUByte(pos + size);
+        size++;
+        if (!(i & 0x80))
+        {
+            break;
+        }
+    }
+    return size;
+}
+
+typedef struct(ubyte size)
+{
+    ubyte raw[size];
+} Varint <read=ReadVarInt>;
+
+uint64 FromVarint(Varint& n)
+{
+    local uint64 value = 0;
+    local ubyte i = 0;
+    local ubyte pos = 0;
+    while(true)
+    {
+        i = n.raw[pos];
+        value |= (uint64)(i & 0x7F) << (pos * 7);
+        pos++;
+        if (!(i & 0x80))
+        {
+            break;
+        }
+    }
+    return value;
+}
+
+string ReadVarInt(Varint& n)
+{
+    string s;
+    SPrintf(s,"varint %Ld", FromVarint(n));
+    return s;
+}
+
+string ReadTag(ubyte tag)
+{
+    local ubyte type = tag & 0x7;
+    local ubyte id = tag >> 3;
+
+    string s;
+    SPrintf(s,"tag %02X, type %d, id %d", tag, type, id);
+    return s;
+}
+
+enum
+{
+    PB_VARINT,
+    PB_64BIT,
+    PB_BYTES,
+};
+
+typedef struct(ubyte size)
+{
+    //ubyte raw[size];
+    local int pos = FTell();
+
+    local int end = pos + size;
+    while( pos < end )
+    {
+        struct
+        {
+            ubyte tag <fgcolor=cPurple,read=ReadTag>;
+            local ubyte type = tag & 0x7;
+            switch(type)
+            {
+                case PB_VARINT:
+                    local ubyte length = read_varint_size();
+                    Varint value(length) <fgcolor=cDkAqua>;
+                    break;
+                case PB_64BIT:
+                    uint64 value <fgcolor=cDkAqua,format=hex>;
+                    break;
+                case PB_BYTES:
+                    local ubyte length = read_varint_size();
+                    Varint size(length) <fgcolor=cDkYellow>;
+                    //PB_SUB node(FromVarint(size));
+                    ubyte value[FromVarint(size)] <fgcolor=cDkGreen>;
+                    break;
+                default:
+                    Printf("not supported type %d!\n", type);
+                    Exit(-1);
+                    break;
+            }
+        } node;
+        pos = FTell();
+    }
+    //FSeek(end);
+} PB_SUB;
+
+DisplayFormatDecimal();
+BigEndian();
+
+struct VarType {
+    local ubyte varSize = read_varint_size();
+    Varint length(varSize) <fgcolor=cDkAqua>;
+};
+
+struct VarBytes {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+    byte data[len];
+};
+
+struct VarLongArray {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+    byte data[len * 8];
+};
+
+typedef struct (int64 size)
+{
+    // byte raw[size];
+    local int pos = FTell();
+
+    local int end = pos + size;
+
+    while (pos < end) {
+        struct {
+            short blockCount;
+
+            typedef struct
+            {
+                ubyte bitsPerValue;
+                switch(bitsPerValue) {
+                    case 0:
+                        VarType id;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        local ubyte varSize = read_varint_size();
+                        Varint length(varSize) <fgcolor=cDkAqua>;
+                        local int64 len = FromVarint(length);
+                    
+                        local int i;
+                        for (i = 0; i < len; i++) {
+                            VarType id;
+                        }
+                        break;
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                        local ubyte varSize = read_varint_size();
+                        Varint length(varSize) <fgcolor=cDkAqua>;
+                        local int64 len = FromVarint(length);
+                    
+                        local int i;
+                        for (i = 0; i < len; i++) {
+                            VarType id;
+                        }
+                        break;
+                    default:
+                        // NOPE in 1.18.2
+                }
+                VarLongArray storage;
+            } Pallete;
+
+            Pallete states;
+            Pallete biomes;
+        } node;
+        pos = FTell();
+    }
+
+    // FSeek(end);
+} MC_CHUNK;
+
+struct Chunk {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    MC_CHUNK chunk(FromVarint(length));
+};
+
+struct Entities {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    // TODO
+};
+
+struct LightMask {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+    local int i;    
+    for (i = 0; i < len; i++) {
+        int from;
+        int to;
+    }
+};
+
+struct Light {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+
+    local int i;
+    for (i = 0; i < len; i++) {
+        VarBytes data;
+    }
+};
+
+struct ChunkDataMessage {
+    byte MessageId; // TODO: 0x22
+    int x;
+    int y;
+
+    TAG_Named heightmaps;
+
+    Chunk data;
+    Entities entities;
+    
+    byte trustEdges; // bool
+    
+    LightMask skyLightMask;
+    LightMask blockLightMask;
+    LightMask emptySkyLightMask;
+    LightMask emptyBlockLightMask;
+    Light skyLight;
+    Light blockLight;
+} file;
