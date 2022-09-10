@@ -1,0 +1,115 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: MinecraftBufferCommon
+//   Authors: MrNikes
+//   Version: 0.0.1
+//   Purpose: Minecraft Buffer
+//  Category: Misc
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+ubyte read_varint_size()
+{
+    local int pos = FTell();
+
+    local ubyte size = 0;
+    local ubyte i = 0;
+    while(true)
+    {
+        i = ReadUByte(pos + size);
+        size++;
+        if (!(i & 0x80))
+        {
+            break;
+        }
+    }
+    return size;
+}
+
+typedef struct(ubyte size)
+{
+    ubyte raw[size];
+} Varint <read=ReadVarInt>;
+
+uint64 FromVarint(Varint& n)
+{
+    local uint64 value = 0;
+    local ubyte i = 0;
+    local ubyte pos = 0;
+    while(true)
+    {
+        i = n.raw[pos];
+        value |= (uint64)(i & 0x7F) << (pos * 7);
+        pos++;
+        if (!(i & 0x80))
+        {
+            break;
+        }
+    }
+    return value;
+}
+
+string ReadVarInt(Varint& n)
+{
+    string s;
+    SPrintf(s,"varint %Ld", FromVarint(n));
+    return s;
+}
+
+typedef struct {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 value = FromVarint(length);
+} VarType <read=ReadVarType>;
+
+string ReadVarType(VarType& n)
+{
+    string s;
+    SPrintf(s,"%Ld", n.value);
+    return s;
+}
+
+typedef struct {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+    byte value[len];
+} VarBytes;
+
+typedef struct {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+    int value[len];
+} VarIntArray;
+
+typedef struct {
+    local ubyte size = read_varint_size();
+    Varint length(size) <fgcolor=cDkAqua>;
+    local int64 len = FromVarint(length);
+    int64 value[len];
+} VarLongArray;
+
+typedef struct {
+    byte value;
+} VarBoolean <read=ReadVarBoolean>;
+
+string ReadVarBoolean(VarBoolean& n)
+{
+    if (n.value == 0) {
+        return "false";
+    }
+    return "true";
+}
+
+typedef struct {
+    VarType length;
+    byte String[length.value];
+} VarString <read=ReadVarString>;
+
+string ReadVarString(VarString& n)
+{
+    return n.String;
+}

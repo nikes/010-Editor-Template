@@ -1,0 +1,45 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: JoinGame
+//   Authors: MrNikes
+//   Version: 0.1
+//   Purpose: Minecraft Join Game Packet (Message)
+//  Category: Misc
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct(int proto) {
+    local uint protocol = proto;
+    if (protocol == 758) {
+        int EntityId;
+        VarBoolean IsHardcore;
+        ubyte Gamemode;
+        byte PreviousGamemode;
+        VarType WorldCount;
+        
+        local int wi;
+        for (wi = 0; wi < WorldCount.value; wi++) {
+            VarString DimensionName;
+        }
+        TAG_Named DimensionCodec;
+        TAG_Named Dimension;
+        VarString Identifier;
+        int64 HashedSeed;
+        VarType MaxPlayers;
+        VarType ViewDistance;
+        VarType SimulationDistance;
+        VarBoolean ReducedDebugInfo;
+        VarBoolean EnableRespawnScreen;
+        VarBoolean IsDebug;
+        VarBoolean IsFlat;
+    }
+} JoinGameMessage <read=ReadJoinGameMessage>;
+
+string ReadJoinGameMessage(JoinGameMessage& n) {
+    string s;
+    SPrintf(s, "JoinGame[%Ld]", n.protocol);
+    return s;
+}

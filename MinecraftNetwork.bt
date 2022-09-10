@@ -1,0 +1,39 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: MinecraftNetwork
+//   Authors: MrNikes
+//   Version: 0.0.1
+//   Purpose: Minecraft Network Protocol
+//  Category: Misc
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//   0.1   2022-09-10 MrNikes: Added read chunk packet
+//------------------------------------------------
+#include "MinecraftBufferCommon.bt"
+#include "MinecraftNBT.bt"
+#include "mcproto/JoinGame.bt"
+#include "mcproto/MapChunk.bt"
+
+local uint protocol = 758;
+BigEndian();
+
+
+typedef struct(uint proto, uint64 packetId) {
+    local int protocol = proto;
+    local uint64 id = packetId;
+    switch (id) {
+        case 0x22:
+            ChunkDataMessage data(protocol);
+            break;
+        case 0x26: // 38
+            JoinGameMessage data(protocol);
+            break;
+    }
+} Message;
+
+struct Packet {
+    VarType PacketId;
+    Message Data(protocol, PacketId.value);
+} file;

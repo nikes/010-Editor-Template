@@ -1,0 +1,145 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: MapChunk
+//   Authors: MrNikes
+//   Version: 0.1
+//   Purpose: Minecraft Map Chunk Packet (Message)
+//  Category: Misc
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct (int64 size)
+{
+    // byte raw[size];
+    local int pos = FTell();
+
+    local int end = pos + size;
+
+    while (pos < end) {
+        struct {
+            typedef struct
+            {
+                ubyte bitsPerValue;
+                switch(bitsPerValue) {
+                    case 0:
+                        VarType id;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        VarType len;
+                    
+                        local int i;
+                        for (i = 0; i < len.value; i++) {
+                            VarType id;
+                        }
+                        break;
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                        VarType len;
+                    
+                        local int i;
+                        for (i = 0; i < len.value; i++) {
+                            VarType id;
+                        }
+                        break;
+                }
+                VarLongArray storage;
+            } PalleteState;
+            typedef struct
+            {
+                ubyte bitsPerValue;
+                switch(bitsPerValue) {
+                    case 0:
+                        VarType id;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                        VarType len;
+                    
+                        local int i;
+                        for (i = 0; i < len.value; i++) {
+                            VarType id;
+                        }
+                        break;
+                }
+                VarLongArray storage;
+            } PalleteBiome;
+
+            short blockCount;
+
+            PalleteState states;
+            PalleteBiome biomes;
+        } node;
+        pos = FTell();
+    }
+
+    FSeek(end); // TODO? whf 1byte
+} MC_CHUNK;
+
+typedef struct {
+    VarType length;
+    MC_CHUNK chunk(length.value);
+} Chunk;
+
+typedef struct {
+    VarType size;
+    
+    local int i;
+    for (i = 0; i < size.value; i++) {
+        struct {
+            byte XZ;
+            short Y;
+            VarType Type;
+            TAG_Compound Data;
+        } Entity;
+    }
+} Entities;
+
+typedef struct {
+    VarType len;
+
+    local int i;    
+    for (i = 0; i < len.value; i++) {
+        int from;
+        int to;
+    }
+} LightMask;
+
+typedef struct {
+    VarType len;
+
+    local int i;
+    for (i = 0; i < len.value; i++) {
+        VarBytes data;
+    }
+} Light;
+
+typedef struct(int proto) {
+    local uint protocol = proto;
+    if (protocol == 758) {
+        int x;
+        int y;
+    
+        TAG_Named heightmaps;
+    
+        Chunk data;
+        Entities entities;
+        
+        VarBoolean trustEdges;
+        
+        LightMask skyLightMask;
+        LightMask blockLightMask;
+        LightMask emptySkyLightMask;
+        LightMask emptyBlockLightMask;
+        Light skyLight;
+        Light blockLight;
+    }
+} ChunkDataMessage;
