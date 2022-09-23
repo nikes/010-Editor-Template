@@ -124,7 +124,7 @@ typedef struct {
 
 typedef struct(int proto) {
     local uint protocol = proto;
-    if (protocol == 758) {
+    if (protocol == 758 || protocol == 760) {
         int x;
         int y;
     

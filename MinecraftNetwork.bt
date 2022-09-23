@@ -15,20 +15,35 @@
 #include "MinecraftNBT.bt"
 #include "mcproto/JoinGame.bt"
 #include "mcproto/MapChunk.bt"
+#include "mcproto/Login.bt"
 
-local uint protocol = 758;
+local uint protocol = 760;
 BigEndian();
 
 
 typedef struct(uint proto, uint64 packetId) {
     local int protocol = proto;
     local uint64 id = packetId;
-    switch (id) {
-        case 0x22:
-            ChunkDataMessage data(protocol);
+    switch (protocol) {
+        case 758:
+            switch (id) {
+                case 0x22:
+                    ChunkDataMessage data(protocol);
+                    break;
+                case 0x26: // 38
+                    JoinGameMessage data(protocol);
+                    break;
+            }
             break;
-        case 0x26: // 38
-            JoinGameMessage data(protocol);
+        case 760:
+            switch (id) {
+                case 0x1f:
+                    ChunkDataMessage data(protocol);
+                    break;
+                case 0x25:
+                    LoginMessage data(protocol);
+                    break;
+            }
             break;
     }
 } Message;
