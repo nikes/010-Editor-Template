@@ -1,0 +1,198 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: x-bmd.bt
+//   Authors: hollyland
+//   Version: 0.1
+//   Purpose: Reading binary .bmd (FilmBox) files structure.
+//  Category: Game
+// File Mask: *.bmd
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+struct A3DVECTOR3
+{
+    float x,y,z;
+};
+
+struct _load_string
+{
+    int len;
+    if(len > 0)
+        char buf[len];
+};
+
+struct A3DLMVERTEX_OPTIMISZE_SAVE
+{
+	char				pos[9];
+	float				u;
+	float				v;
+};
+
+struct A3DLMVERTEX_WITHOUTNORMAL
+{
+	A3DVECTOR3			pos;
+	DWORD			diffuse;
+
+	float				u;
+	float				v;
+};
+
+struct A3DAABB
+{
+    A3DVECTOR3	Center;
+	A3DVECTOR3	Extents;
+	A3DVECTOR3	Mins;
+	A3DVECTOR3	Maxs;
+};
+
+struct A3DLitMesh
+{
+    DWORD dwVersion;
+    if (dwVersion >= 0x1000000b)
+    {
+        byte bOptimize;
+        _load_string m_strName;
+        int nColorCount;
+        
+        DWORD m_pDayColors[nColorCount];
+        
+        if (dwVersion >= 0x1000000d)
+        {
+            DWORD m_pNightColors[nColorCount];
+        }
+    }        
+    else if (dwVersion >= 0x1000000a)
+    {
+        byte bOptimize;
+        _load_string m_strName;
+		int nColorCount;
+		byte bHasExtraColors;
+        
+        if (bOptimize == 0)
+        {
+            char pDayColors[nColorCount];
+            if (bHasExtraColors)
+			{
+				//pFileToLoad->Seek(3 * m_nColorCount, AFILE_SEEK_CUR);
+			}
+        }
+        else
+        {
+            DWORD m_pDayColors[nColorCount];            
+        }
+    }        
+    else if (dwVersion >= 0x10000009)
+    {
+        byte bOptimize;
+        _load_string m_strName;
+        _load_string szTextureMap;
+		int m_nTexDXT1AlphaFlag;
+        
+        int nVertCount, nFaceCount;
+        byte bHasExtraColors;
+        
+        if (bOptimize == 0)
+        {
+            A3DLMVERTEX_OPTIMISZE_SAVE pVerts[nVertCount];
+            char pNormal[3 * nVertCount];
+            WORD m_pIndices[nFaceCount * 3];
+            char pDayColors[3 * nVertCount];
+        }
+        else
+        {
+            A3DLMVERTEX_WITHOUTNORMAL pVerts[nVertCount];
+            A3DVECTOR3 m_pNormals[nVertCount];
+            WORD m_pIndices[nFaceCount * 3];
+            A3DVECTOR3 m_pDayColors[nVertCount];
+            
+            A3DAABB m_aabb;
+        }
+    }
+    else if( dwVersion == 0x10000002 )
+    {
+    }
+    else if( dwVersion == 0x10000003 )
+    {
+    }
+    else if( dwVersion == 0x10000004 )
+    {
+    }
+    else if( dwVersion == 0x10000005 )
+    {
+    }
+    else if( dwVersion >= 0x10000006 )
+    {
+    }
+    else
+    {
+    }
+};
+
+struct A3DLitModel
+{
+    DWORD dwVersion;
+    if (dwVersion >= 0x10000003)
+    {
+        byte bLocalSaveShareData;
+            
+        int len;
+        char m_strShareDataPath[len];
+        
+        A3DVECTOR3 m_vec3;
+        A3DVECTOR3 m_vecDir;
+        A3DVECTOR3 m_vecUp;
+        A3DVECTOR3 m_vecPos;
+        
+        int nNumMeshes;
+        
+        local int i;
+	    for (i = 0; i < nNumMeshes; i++)
+            A3DLitMesh pMesh;
+    }
+    else if (dwVersion == 0x10000001)
+    {
+        A3DVECTOR3 m_vec3;
+        A3DVECTOR3 m_vecDir;
+        A3DVECTOR3 m_vecUp;
+        A3DVECTOR3 m_vecPos;
+        
+        int nNumMeshes;
+        
+        local int i;
+	    for (i = 0; i < nNumMeshes; i++)
+            A3DLitMesh pMesh;
+    }
+    else if( dwVersion == 0x10000002 )
+    {
+        A3DVECTOR3 m_vec3;
+        A3DVECTOR3 m_vecDir;
+        A3DVECTOR3 m_vecUp;
+        A3DVECTOR3 m_vecPos;
+        
+        int nNumMeshes;
+        
+        local int i;
+	    for (i = 0; i < nNumMeshes; i++)
+            A3DLitMesh pMesh;
+    }
+};
+
+DWORD version;
+byte bCollideOnly;
+
+if (version < 0x80000001)
+{ }
+else
+{
+    if(version >= 0x80000002)
+    {
+        int len;
+        char m_strPxdPath[len];
+    }        
+}
+
+A3DLitModel m_pA3DLitModel;
+
+int len;
+char m_chf[len];

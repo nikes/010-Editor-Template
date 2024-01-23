@@ -1,0 +1,73 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: x-lms.bt
+//   Authors: hollyland
+//   Version: 0.1
+//   Purpose: Reading binary .bmd (FilmBox) files structure.
+//  Category: Game
+// File Mask: *.lms
+//  ID Bytes: 4D 4F 58 42
+//   History: 
+//------------------------------------------------
+struct A3DVECTOR3
+{
+    float x,y,z;
+};
+
+struct A3DLMVERTEX_OPTIMISZE_SAVE
+{
+	char				pos[9];
+	float				u;
+	float				v;
+};
+
+struct A3DLMVERTEX_WITHOUTNORMAL
+{
+	A3DVECTOR3			pos;
+	DWORD			diffuse;
+
+	float				u;
+	float				v;
+};
+
+struct A3DAABB
+{
+    A3DVECTOR3	Center;
+	A3DVECTOR3	Extents;
+	A3DVECTOR3	Mins;
+	A3DVECTOR3	Maxs;
+};
+
+char flag[4];
+DWORD dwVersion;
+int nNumMeshes;
+
+DWORD dwVersion;
+byte bOptimize;
+
+int len;
+char szTextureMap[len];
+
+int m_nTexDXT1AlphaFlag;
+int nVertCount, nFaceCount;
+
+if (bOptimize == 0)
+{
+    A3DLMVERTEX_OPTIMISZE_SAVE pVerts[m_nVertCount];
+    char pNormal[nVertCount*3];
+    DWORD m_pIndices[nFaceCount*3];
+}
+else
+{
+    A3DLMVERTEX_WITHOUTNORMAL pVerts[nVertCount];
+    DWORD m_pNormals[nVertCount];
+    WORD m_pIndices[nFaceCount*3];    
+}
+
+if (dwVersion >= 0x1000000c)
+{
+    DWORD m_pTangents[nVertCount];
+}
+
+A3DAABB m_InitAABB;

@@ -1,0 +1,16 @@
+//------------------------------------------------
+//--- 010 Editor v10.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "MinecraftBufferCommon.bt"
+#include "MinecraftNBT.bt"
+
+TAG_Compound Name;

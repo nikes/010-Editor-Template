@@ -1,0 +1,228 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: Bmd File
+//   Authors: Hollyland
+//   Version: 0.0.1
+//   Purpose: Reader Bmd Model File
+//  Category: 
+// File Mask: MOXB
+//  ID Bytes: 4D4F5842
+//   History: 
+//------------------------------------------------
+typedef DWORD A3DCOLOR;	//	Color
+
+struct A3DVECTOR3 {
+    float x, y, z;
+};
+
+struct A3DLVERTEX
+{
+	FLOAT x, y, z;
+	DWORD diffuse;
+	DWORD specular;
+	FLOAT tu, tv;
+};
+
+struct A3DLMVERTEX_WITHOUTNORMAL {
+	A3DVECTOR3			pos;
+	A3DCOLOR			diffuse;
+
+	float				u;
+	float				v;
+};
+
+struct A3DAABB {
+	A3DVECTOR3	Center;
+	A3DVECTOR3	Extents;
+	A3DVECTOR3	Mins;
+	A3DVECTOR3	Maxs;
+};
+
+struct MeshV2 {
+    char szName[64];
+    char szTextureMap[256];
+
+    int nVertCount, nFaceCount;
+    A3DLVERTEX pVerts[nVertCount];
+    WORD m_pIndices[nFaceCount * 3];
+    A3DVECTOR3 m_pNormals[nVertCount];
+
+    A3DAABB m_aabb;
+};
+
+struct MeshV3 {
+    char szName[64];
+    char szTextureMap[256];
+
+    int nVertCount, nFaceCount;
+    A3DLVERTEX pVerts[nVertCount];
+    WORD m_pIndices[nFaceCount * 3];
+    A3DVECTOR3 m_pNormals[nVertCount];
+    A3DCOLOR m_pDayColors[nVertCount];
+    A3DCOLOR m_pNightColors[nVertCount];
+
+    A3DAABB m_aabb;
+};
+
+struct MeshV4 {
+    char szName[64];
+    char szTextureMap[256];
+        
+    int nVertCount, nFaceCount;        
+    A3DLMVERTEX_WITHOUTNORMAL pVerts[nVertCount];
+    WORD m_pIndices[nFaceCount * 3];
+    A3DVECTOR3 m_pNormals[nVertCount];
+    A3DCOLOR m_pDayColors[nVertCount];
+    A3DCOLOR m_pNightColors[nVertCount];
+
+    A3DAABB m_aabb;
+};
+
+struct A3DCOLORVALUE {
+    float r, g, b, a;
+};
+
+struct A3DMATERIALPARAM
+{
+    A3DCOLORVALUE   Diffuse;
+    A3DCOLORVALUE   Ambient;
+    A3DCOLORVALUE   Specular;
+    A3DCOLORVALUE   Emissive;
+    FLOAT           Power;
+    byte            m_b2Sided;
+};
+
+struct MeshV5 {
+    char szName[64];
+    char szTextureMap[256];
+        
+    int nVertCount, nFaceCount;        
+    A3DLMVERTEX_WITHOUTNORMAL   pVerts[nVertCount];
+    WORD                        m_pIndices[nFaceCount * 3];
+    A3DVECTOR3                  m_pNormals[nVertCount];
+    A3DCOLOR                    m_pDayColors[nVertCount];
+    A3DCOLOR                    m_pNightColors[nVertCount];
+
+    A3DAABB                     m_aabb;
+    A3DMATERIALPARAM            m_Material;
+};
+
+struct MeshV6 {
+    char szName[64];
+    char szTextureMap[256];
+        
+    int nVertCount, nFaceCount;
+    byte m_bHasExtraColors;
+
+    A3DLMVERTEX_WITHOUTNORMAL   pVerts[nVertCount];
+    WORD                        m_pIndices[nFaceCount * 3];
+    A3DVECTOR3                  m_pNormals[nVertCount];
+    A3DCOLOR                    m_pDayColors[nVertCount];
+    A3DCOLOR                    m_pNightColors[nVertCount];
+
+    if(m_bHasExtraColors > 0) {
+        A3DCOLOR m_pDayColorsExtra[nVertCount];
+        A3DCOLOR m_pNightColorsExtra[nVertCount];
+    }
+
+    A3DAABB                     m_aabb;
+    A3DMATERIALPARAM            m_Material;
+};
+
+struct A3DLIGHTMAPCOORD {
+    float u, v;
+};
+
+struct MeshV100 {
+    char szName[64];
+    char szTextureMap[256];
+
+    int nVertCount, nFaceCount;
+    A3DLMVERTEX_WITHOUTNORMAL   pVerts[nVertCount];
+    WORD                        m_pIndices[nFaceCount * 3];
+    A3DVECTOR3                  m_pNormals[nVertCount];
+    A3DCOLOR                    m_pDayColors[nVertCount];
+    A3DCOLOR                    m_pNightColors[nVertCount];
+
+    A3DAABB                     m_aabb;
+    A3DMATERIALPARAM            m_Material;
+    A3DLIGHTMAPCOORD            m_pLMCoords[nVertCount];
+};
+
+int dwHeader;
+
+int version<format=hex>;
+//int dwVersion<format=hex>;
+
+if (version == 0x80000001) {
+    byte bCollideOnly;                
+    int dwVersion;
+}
+else {
+    local int dwVersion = version;
+}
+
+// then output some basic information of this model
+A3DVECTOR3 m_vecScale;
+A3DVECTOR3 m_vecDir;
+A3DVECTOR3 m_vecUp;
+A3DVECTOR3 m_vecPos;
+
+// now read the number of meshes in this model
+int nNumMeshes<fgcolor=0xffffff, bgcolor=0x0000FF,comment="文件中包含模型数量">;
+
+local int i;
+for(i = 0; i < nNumMeshes; i++) {
+
+    DWORD dmVersion <format=hex,optimize=false>;
+
+    if( dmVersion[i] == 0x10000002 )
+        MeshV2 v2 <optimize=false>;
+
+    if( dmVersion[i] == 0x10000003 )
+        MeshV3 v3 <optimize=false>;
+
+    if( dmVersion[i] == 0x10000004 )
+        MeshV4 v4 <optimize=false>;   
+
+    if( dmVersion[i] == 0x10000005 )
+        MeshV5 v5 <optimize=false>;
+
+    if( dmVersion[i] == 0x10000006 )
+        MeshV6 v6 <optimize=false>;
+
+    if( dmVersion[i] == 0x10000100 ) {
+        MeshV100 v100 <optimize=false>;
+    }
+}
+
+if( dwVersion == 0x10000100 ) {
+    char m_szLightMap[256];
+}
+
+if( dwVersion == 0x10000101 ) {
+    char m_szLightMap[260];
+    char m_szNightLightMap[260];
+}
+
+struct MESHLIST {
+    int nNumMesh;
+    int meshList[nNumMesh];
+};
+
+struct CCDSide {
+    A3DVECTOR3 vNormal;
+    float fDist;
+    byte bBevel;
+};
+
+int m_nNumHull;
+if ( m_nNumHull > 0) {
+    MESHLIST meshList[m_nNumHull+8];
+
+    A3DAABB m_aabb;
+    DWORD   m_dwReserved;
+    int     m_nSides;
+    CCDSide side[m_nSides];
+}

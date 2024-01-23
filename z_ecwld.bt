@@ -1,0 +1,118 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct ECWDFILEHEADER
+{
+	float	fWorldWid;		//	World width in meters
+	float	fWorldLen;		//	World length in meters
+	float	fBlockSize;		//	Block size in meters
+	int		iBlockGrid;		//	Block grid row and column number, each block has (grid x grid) terrain grids
+	int		iNumBlock;		//	Number of block
+	int		iWorldBlkRow;	//	Block row number in whole world
+	int		iWorldBlkCol;	//	Block column number in whole world
+	DWORD	dwTreeOff;		//	Tree type data offset
+	DWORD	dwGrassOff;		//	Grass type data offset
+	int		iNumTreeType;	//	Number of tree type
+	int		iNumGrassType;	//	Number of grass type
+	DWORD	dwFlags;		//	World file flags
+	float	vSunDir[3];
+	DWORD	dwSunColor;
+	DWORD	dwAmbient;
+	DWORD	dwAmbient2;
+	float	fSkyFogFactor;
+	float	fSunPower;
+	float	fAmbientPower;
+	DWORD	dwNightSunColor;
+	DWORD	dwNightAmbient;
+	DWORD	dwNightAmbient2;
+	float	fNightSunPower;
+	float	fNightAmbientPower;
+	DWORD   Wind;
+	float	fPtLightPower;
+	float	fNightPtLightPower;
+	float	fSunLightCo;
+	float	SSAO_Radius;
+	float	SSAO_Constrast;
+	float	SSAO_Darkest;
+	float	SpeedTreeWindFrequency;
+	int		nSepBuildingPath;
+
+	// reverse
+	float	fSkyFogStart;
+	float	fSkyFogEnd;
+	byte	reserve[28];
+};
+
+struct A3DVECTOR3
+{
+    float x, y, z;
+};
+
+struct A3DVECTOR4
+{
+    float x, y, z, w;
+};
+
+struct ECWDFILEFFTWATER2 // ECWDFFTWATERVERSION
+{
+	float m_fWaterLevel;				//水面高度
+	float m_fWindDirection;				//风向								0 ~ PI*2
+	float m_fGravity;					//重力								1 ~ 20
+
+	float m_fWindSpeed;					//风速								0 ~ 16
+	float m_fWavesSpeed;				//波浪速度(影响非FFT波浪和泡沫)		0 ~ 10 
+	float m_fWavesAmount;				//FFT瓷砖大小						0 ~ 10
+	float m_fWavesSize;					//波浪剧烈程度						0 ~ 2
+	float m_fSoftIntersectionFactor;	//边缘软化程度						0 ~ 10
+	float m_fReflectionAmount;			//反射强度							0 ~ 10
+	float m_fWhiteCapsAmount;			//顶部高光							0 ~ 2
+	float m_fSunMultiplier;				//太阳反光强度						0 ~ 32
+	float m_fFresnelScale;				//菲涅尔缩放						0 ~ 32
+
+	float m_fFogDensity;				//水下雾强度系数					0 ~ 4
+	float m_fWaterFogScaleExp;			//水下雾强度指数					0 ~ 10				
+
+	byte m_bUseFFT;						//是否开启FFT
+	byte m_bEdgeFoam;					//是否开启边缘泡沫
+	byte m_bWaveFoam;					//是否开启波浪上的泡沫
+	byte m_bWaveGloss;					//是否开启波浪上的高光
+
+	byte m_bUseCustomColor;				//是否使用用户指定的颜色作为水的颜色, 不开启则使用全局雾的颜色
+	A3DVECTOR3 m_vWaterFogColor;		//用户指定的水颜色
+
+	byte m_bEnableAreaConstrain;
+	A3DVECTOR4 m_vAreaConstrain;
+	byte m_bCubeReflect;
+};
+
+DWORD	dwIdentify;
+DWORD	dwVersion;
+
+local int block;
+if(dwVersion  >= 34)
+{
+    ECWDFILEHEADER header;
+    block = header.iNumBlock;
+}
+
+if(dwVersion >= 32)
+{
+    DWORD FFTWaterVersion;
+    if(FFTWaterVersion == 2)
+    {
+        ECWDFILEFFTWATER2 p2;
+        byte unkon[9];
+    }
+}
+
+DWORD NumBlock[block];

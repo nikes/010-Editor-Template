@@ -1,0 +1,29 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//	World block share data file header
+struct ECBSDFILEHEADER
+{
+	DWORD	dwIdentify;		//	Identity, must be ECWTFILE_IDENTIFY
+	DWORD	dwVersion;		//	Version, must be ECWTFILE_VERSION
+	int		iNumSubTrn;		//	Number of sub-terrain
+	BYTE	aReserved[60];	//	Reserved
+} header;
+
+struct SUBTRNDATA
+{
+    int         len;
+	char	    pDataFile[len];
+};
+
+SUBTRNDATA trn[header.iNumSubTrn];
